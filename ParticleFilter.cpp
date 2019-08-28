@@ -1,5 +1,7 @@
 #include "ParticleFilter.h"
 
+int ParticleFilter::m_cov = 100;
+
 ParticleFilter::ParticleFilter()
 {
     m_init = false;
@@ -21,38 +23,34 @@ ParticleFilter::ParticleFilter(int numOfParticles, int numOfStep)
 void ParticleFilter::calAverage(float& x, float& y){
     float x_tot = 0, y_tot = 0; 
     for(auto p : m_particles){
-        x_tot += p.getPos()[0];
-        y_tot += p.getPos()[1];
+        vector<float> pos = p.getPos(); 
+        x_tot += pos[0];
+        y_tot += pos[1];
     }
-    x_tot /= m_particles.size();
-    y_tot /= m_particles.size(); 
-    x = x_tot; 
-    y = y_tot; 
+    x = x_tot / m_particles.size();
+    y = y_tot / m_particles.size(); 
 }
 
-void ParticleFilter::priorUpdate(Model& car, float acc, float steeringAngle)
+void ParticleFilter::priorUpdate(Model& car, const float& acc, const float& steeringAngle)
 {
     default_random_engine generator;
-    normal_distribution<float> distribution(60, 1);
+    normal_distribution<float> distribution(60, 1); // (center, std)
     if(!m_init){
         m_init = true;
         for(int i = 0; i < m_particlesSize; i++){
             Model a = car; 
-            //a.setIcNoise(distribution(generator));
             a.setIcNoise(distribution(generator));
-            // a.move(acc, steeringAngle); 
             m_particles.push_back(a); 
         }
     }else{
         car.move(acc, steeringAngle);
         for(int i = 0; i < m_particlesSize; i++){
             m_particles[i].move(acc, steeringAngle);
-            // cout << particles[i].getPos()[0] << " " << particles[i].getPos()[1] << endl;
         }
     }
 }
 
-void ParticleFilter::assignWeight(Model car)
+void ParticleFilter::assignWeight(const Model& car)
 {
     m_totalWeight = 0; 
     float x1 = car.getPos()[0], y1 = car.getPos()[1], x2, y2, delta; 
@@ -61,7 +59,6 @@ void ParticleFilter::assignWeight(Model car)
         y2 = m_particles[i].getPos()[1];
         delta = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2));
         m_weight[i] = 1 / sqrt(2 * M_PI * m_cov) * exp(-(pow(delta, 2) / (2 * m_cov))); 
-        // cout << x2 << " " << y2 << "   " << m_weight[i] << endl;
         m_totalWeight += m_weight[i];
     }
 }
@@ -99,16 +96,14 @@ vector<float> ParticleFilter::implement(Model& car)
 
     float x, y; 
     calAverage(x, y);
-    // cout << "Step #" << m_iter++ << "  ";
-    // cout << car.getPos()[0] << ", " << car.getPos()[1] << "   " << x << ", " << y << "    ";
     double err = sqrt(pow(x - car.getPos()[0], 2) + pow(y - car.getPos()[1], 2));
-    // cout << "Square mean error: " << err << endl;
 
     vector<float> estimation = {x, y, (float)err};
+    
     return estimation;
 }
 
-int ParticleFilter::getStep()
+int ParticleFilter::getStep() const
 {
     return m_step;
 }

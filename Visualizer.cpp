@@ -13,7 +13,8 @@ Visualizer::Visualizer()
 
 bool Visualizer::checkIntersection(RotatedRect rec, Model car)
 {
-    RotatedRect vehRect = RotatedRect(Point2f(car.getPos()[0], car.getPos()[1]),
+    Point2i p1 = Point2i(static_cast<int>(car.getPos()[0]) % width, static_cast<int>(car.getPos()[1]) % length);
+    RotatedRect vehRect = RotatedRect(p1,
                                       Size2f(CAR_SIZE_LENGTH * 6, 6 *CAR_SIZE_WIDTH),
                                       180 * car.getAngle() / M_PI);
     Point2f vr[4];
@@ -35,10 +36,12 @@ void Visualizer::drawRectangle(RotatedRect rec, Mat& _image, Scalar col)
 
 void Visualizer::drawVeh(Model car, vector<float> est)
 {
-    RotatedRect vehRect = RotatedRect(Point2f(car.getPos()[0], car.getPos()[1]),
+    Point2i p1 = Point2i(static_cast<int>(car.getPos()[0]) % width, static_cast<int>(car.getPos()[1]) % length);
+    Point2i p2 = Point2i(static_cast<int>(est[0]) % width, static_cast<int>(est[1]) % length);
+    RotatedRect vehRect = RotatedRect(p1,
                                       Size2f(CAR_SIZE_LENGTH * 6, 6 *CAR_SIZE_WIDTH),
                                       180 * car.getAngle() / M_PI);
-    RotatedRect estRect = RotatedRect(Point2f(est[0], est[1]),
+    RotatedRect estRect = RotatedRect(p2,
                                       Size2f(CAR_SIZE_LENGTH * 6, 6 *CAR_SIZE_WIDTH),
                                       180 * car.getAngle() / M_PI);
 
@@ -49,7 +52,8 @@ void Visualizer::drawVeh(Model car, vector<float> est)
 
 void Visualizer::drawVeh(Model car)
 {
-    RotatedRect vehRect = RotatedRect(Point2f(car.getPos()[0], car.getPos()[1]),
+    Point2i p1 = Point2i(static_cast<int>(car.getPos()[0]) % width, static_cast<int>(car.getPos()[1]) % length);
+    RotatedRect vehRect = RotatedRect(p1,
                                       Size2f(CAR_SIZE_LENGTH * 6, 6 *CAR_SIZE_WIDTH),
                                       180 * car.getAngle() / M_PI);
     if(!m_traj) image = Mat::zeros(cv::Size(length, width), CV_8UC3);
@@ -98,13 +102,16 @@ bool Visualizer::show(Model& car, vector<float> estimation)
 
     imshow("image", image);
 
-    car.steeringAngle = 0;
+    car.acc = 0;
+    // car.steeringAngle = 0;
     char key = waitKey(50);
 
-    if(key == 'j' || key == 'J') car.steeringAngle += M_PI/180;
-    if(key == 'l' || key == 'L') car.steeringAngle -= M_PI/180;
+    if(key == 'j' || key == 'J') car.steeringAngle -= M_PI/180;
+    if(key == 'l' || key == 'L') car.steeringAngle += M_PI/180;
     if(key == 'o' || key == 'O') drawObstacle(car, image);
     if(key == 't' || key == 'T') m_traj = !m_traj;
+    if(key == 'k' || key == 'K') car.acc -= 5;
+    if(key == 'i' || key == 'I') car.acc += 5;
 
     return (key == 'a' || key == 'A')? false : true;
 }

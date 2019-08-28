@@ -35,12 +35,12 @@ public:
     float acc;
     float steeringAngle;
 
-    void move(float acc, float steeringAngle);
-    void setIC(float x, float y, float v, float headingAngle, float beta);
-    void setIcNoise(float noise);
-    vector<float> getPos();
-    float getVel(); 
-    float getAngle() {return m_beta + m_headingAngle;};
+    void move(const float acc, const float steeringAngle);
+    void setIC(const float x, const float y, const float v, const float headingAngle, const float beta);
+    void setIcNoise(const float noise);
+    vector<float> getPos() const;
+    float getVel() const; 
+    float getAngle() const;
 };
 
 #endif 

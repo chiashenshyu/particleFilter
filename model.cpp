@@ -21,7 +21,7 @@ Model::Model(float deltatime)
 {
 }
 
-void Model::setIC(float x, float y, float v, float headingAngle, float beta)
+void Model::setIC(const float x, const float y, const float v, const float headingAngle, const float beta)
 {
     m_x = x;
     m_y = y; 
@@ -30,7 +30,7 @@ void Model::setIC(float x, float y, float v, float headingAngle, float beta)
     m_beta = beta; 
 }
 
-void Model::setIcNoise(float noise)
+void Model::setIcNoise(const float noise)
 {
     m_x += noise;
     m_y += noise;
@@ -39,7 +39,7 @@ void Model::setIcNoise(float noise)
     m_beta; // += noise;
 }
 
-void Model::move(float acc, float steeringAngle)
+void Model::move(const float acc, const float steeringAngle)
 {
     m_x += m_v * cos(m_beta + m_headingAngle) * dt;
     m_y += m_v * sin(m_beta + m_headingAngle) * dt;
@@ -48,7 +48,7 @@ void Model::move(float acc, float steeringAngle)
     m_beta = atan(.5 * tan(steeringAngle));    
 }
 
-vector<float> Model::getPos()
+vector<float> Model::getPos() const
 {
     vector<float> pos(2);
     pos[0] = m_x;
@@ -56,6 +56,12 @@ vector<float> Model::getPos()
     return pos;
 }
 
-float Model::getVel(){
+float Model::getVel() const 
+{
     return m_v;
+}
+
+float Model::getAngle() const
+{
+    return m_beta + m_headingAngle; 
 }
